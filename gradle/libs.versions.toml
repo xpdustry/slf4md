@@ -10,7 +10,7 @@ spotless = "6.25.0"
 errorprone-gradle = "4.0.0"
 
 # logging
-slf4j = "2.0.13"
+slf4j = "2.0.16"
 
 # testing
 junit = "5.10.2"
