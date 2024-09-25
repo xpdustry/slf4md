@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.indra.common) apply false
     alias(libs.plugins.indra.git)
-    alias(libs.plugins.indra.publishing) apply false
+    // alias(libs.plugins.indra.publishing) apply false
     alias(libs.plugins.shadow) apply false
     alias(libs.plugins.toxopid) apply false
     alias(libs.plugins.errorprone.gradle) apply false
