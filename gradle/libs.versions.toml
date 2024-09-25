@@ -13,7 +13,7 @@ errorprone-gradle = "4.0.0"
 slf4j = "2.0.13"
 
 # testing
-junit = "5.10.2"
+junit = "5.11.1"
 
 # static analysis
 errorprone-core = "2.28.0"
