@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j:slf4j-api:2.0.13")
+    compileOnly("org.slf4j:slf4j-api:$VERSION")
 }
 ```
 
