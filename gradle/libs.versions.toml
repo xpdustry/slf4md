@@ -14,7 +14,7 @@ junit = "5.11.1"
 
 # static analysis
 errorprone-core = "2.32.0"
-nullaway = "0.11.3"
+nullaway = "0.12.1"
 checker-qual = "3.47.0"
 
 [libraries]
