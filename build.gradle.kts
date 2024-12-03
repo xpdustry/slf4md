@@ -24,7 +24,7 @@ plugins {
     alias(libs.plugins.errorprone.gradle) apply false
 }
 
-version = "1.0.1" + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
+version = "1.0.2" + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
 group = "com.xpdustry"
 description = "A SLF4J implementation for Mindustry servers."
 
@@ -80,21 +80,12 @@ subprojects {
         val annotationProcessor by configurations
         val errorprone by configurations
         val api by configurations
-        // val testImplementation by configurations
-        // val testRuntimeOnly by configurations
-        // val testCompileOnly by configurations
 
         api(rootProject.libs.slf4j.api)
         api(rootProject.libs.slf4j.from.jul)
 
         compileOnly(toxopid.dependencies.mindustryCore)
         compileOnly(toxopid.dependencies.arcCore)
-        // testImplementation(toxopid.dependencies.mindustryCore)
-        // testImplementation(toxopid.dependencies.arcCore)
-
-        // testImplementation(rootProject.libs.junit.api)
-        // testRuntimeOnly(rootProject.libs.junit.engine)
-
         compileOnlyApi(rootProject.libs.checker.qual)
         annotationProcessor(rootProject.libs.nullaway)
         errorprone(rootProject.libs.errorprone.core)
