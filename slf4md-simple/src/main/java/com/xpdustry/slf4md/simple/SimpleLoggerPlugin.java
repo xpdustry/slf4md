@@ -44,7 +44,7 @@ public final class SimpleLoggerPlugin extends Plugin {
             if (!(LoggerFactory.getILoggerFactory() instanceof SimpleLoggerFactory)) {
                 Log.err(
                         """
-                        The slf4j Logger factory isn't provided by Distributor (got @ instead of DistributorLoggerFactory).
+                        The slf4j Logger factory isn't provided by SLF4MD (got @ instead of SimpleLoggerFactory).
                         Make sure another plugin doesn't set it's own logging implementation or that it's logging implementation is relocated correctly.
                         """,
                         LoggerFactory.getILoggerFactory().getClass().getName());
