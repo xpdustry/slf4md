@@ -1,5 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.diffplug.gradle.spotless.SpotlessPlugin
+import com.diffplug.spotless.FormatterFunc
 import com.github.jengelman.gradle.plugins.shadow.ShadowJavaPlugin
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -13,6 +14,7 @@ import net.kyori.indra.IndraPlugin
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.ErrorPronePlugin
 import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.internal.impldep.kotlinx.serialization.Serializable
 
 plugins {
     alias(libs.plugins.spotless) apply false
@@ -45,7 +47,11 @@ allprojects {
             java {
                 palantirJavaFormat()
                 importOrder("", "\\#")
-                custom("no-wildcard-imports") { it.apply { if (contains("*;\n")) error("No wildcard imports allowed") } }
+                // I will kill someone
+                custom("no-wildcard-imports", object : FormatterFunc, java.io.Serializable {
+                    override fun apply(input: String) =
+                        input.apply { if (contains("*;\n")) error("No wildcard imports allowed") }
+                })
                 licenseHeaderFile(rootProject.file("HEADER.txt"))
                 bumpThisNumberIfACustomStepChanges(1)
             }
