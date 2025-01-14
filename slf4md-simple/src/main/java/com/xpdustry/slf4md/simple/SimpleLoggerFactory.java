@@ -26,7 +26,6 @@
 package com.xpdustry.slf4md.simple;
 
 import arc.util.serialization.Json;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,10 +35,13 @@ import mindustry.mod.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SimpleLoggerFactory implements ILoggerFactory {
 
     private static final List<String> LOGGING_PACKAGES = List.of("org.slf4j", "java.util.logging", "sun.util.logging");
+
+    private static final List<Class<?>> LOGGING_CLASSES = List.of(SimpleLoggerFactory.class, LoggerFactory.class);
 
     private final Map<String, SimpleLogger> loggers = new ConcurrentHashMap<>();
 
@@ -58,17 +60,17 @@ public final class SimpleLoggerFactory implements ILoggerFactory {
 
         try {
             caller = Class.forName(name);
-        } catch (final ClassNotFoundException ignored1) {
-            final var candidate = tryFindCaller(Thread.currentThread().getStackTrace());
-            if (candidate == null) {
+        } catch (final ClassNotFoundException ignored) {
+            final var candidate = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+                    .walk(stream -> stream.map(StackWalker.StackFrame::getDeclaringClass)
+                            .dropWhile(clazz -> LOGGING_CLASSES.stream().noneMatch(skip -> skip.isAssignableFrom(clazz))
+                                    || LOGGING_PACKAGES.stream().anyMatch(clazz.getPackageName()::startsWith))
+                            .findFirst());
+            if (candidate.isEmpty()) {
                 return new SimpleLogger(name, null);
             }
-            try {
-                caller = Class.forName(candidate);
-                cache = false;
-            } catch (final ClassNotFoundException ignored2) {
-                return new SimpleLogger(name, null);
-            }
+            cache = false;
+            caller = candidate.get();
         }
 
         if (Plugin.class.isAssignableFrom(caller)) {
@@ -100,16 +102,6 @@ public final class SimpleLoggerFactory implements ILoggerFactory {
             this.loggers.put(name, logger);
         }
         return logger;
-    }
-
-    private @Nullable String tryFindCaller(final StackTraceElement[] stacktrace) {
-        return Arrays.stream(stacktrace)
-                .skip(3) // 0: stacktrace call, 1: DistributorLoggerFactory#getLogger, 2: LoggerFactory#getLogger
-                .map(StackTraceElement::getClassName)
-                // Skips the logger wrappers
-                .dropWhile(clazz -> LOGGING_PACKAGES.stream().anyMatch(clazz::startsWith))
-                .findFirst()
-                .orElse(null);
     }
 
     private @Nullable String getPluginDisplayName(final ClassLoader loader) {
