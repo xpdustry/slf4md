@@ -14,7 +14,6 @@ import net.kyori.indra.IndraPlugin
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.ErrorPronePlugin
 import net.ltgt.gradle.errorprone.errorprone
-import org.gradle.internal.impldep.kotlinx.serialization.Serializable
 
 plugins {
     alias(libs.plugins.spotless) apply false
@@ -48,10 +47,12 @@ allprojects {
                 palantirJavaFormat()
                 importOrder("", "\\#")
                 // I will kill someone
-                custom("no-wildcard-imports", object : FormatterFunc, java.io.Serializable {
-                    override fun apply(input: String) =
-                        input.apply { if (contains("*;\n")) error("No wildcard imports allowed") }
-                })
+                custom(
+                    "no-wildcard-imports",
+                    object : FormatterFunc, java.io.Serializable {
+                        override fun apply(input: String) = input.apply { if (contains("*;\n")) error("No wildcard imports allowed") }
+                    },
+                )
                 licenseHeaderFile(rootProject.file("HEADER.txt"))
                 bumpThisNumberIfACustomStepChanges(1)
             }
