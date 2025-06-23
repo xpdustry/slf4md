@@ -10,9 +10,9 @@ errorprone-gradle = "4.2.0"
 slf4j = "2.0.17"
 
 # static analysis
+jspecify = "1.0.0"
 errorprone-core = "2.38.0"
 nullaway = "0.12.7"
-checker-qual = "3.49.4"
 
 [libraries]
 # logging
@@ -20,13 +20,12 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-from-jul = { module = "org.slf4j:jul-to-slf4j", version.ref = "slf4j" }
 
 # static analysis
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone-core" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
-checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
 
 [plugins]
 indra-common = { id = "net.kyori.indra", version.ref = "indra" }
-indra-publishing = { id = "net.kyori.indra.publishing", version.ref = "indra" }
 indra-git = { id = "net.kyori.indra.git", version.ref = "indra" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 toxopid = { id = "com.xpdustry.toxopid", version.ref = "toxopid" }

@@ -19,7 +19,6 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.indra.common) apply false
     alias(libs.plugins.indra.git)
-    // alias(libs.plugins.indra.publishing) apply false
     alias(libs.plugins.shadow) apply false
     alias(libs.plugins.toxopid) apply false
     alias(libs.plugins.errorprone.gradle) apply false
@@ -65,7 +64,6 @@ allprojects {
 
 subprojects {
     apply<IndraPlugin>()
-    // apply<IndraPublishingPlugin>()
     apply<ShadowPlugin>()
     apply<ToxopidPlugin>()
     apply<ErrorPronePlugin>()
@@ -93,15 +91,10 @@ subprojects {
 
         compileOnly(toxopid.dependencies.mindustryCore)
         compileOnly(toxopid.dependencies.arcCore)
-        compileOnlyApi(rootProject.libs.checker.qual)
+        compileOnlyApi(rootProject.libs.jspecify)
         annotationProcessor(rootProject.libs.nullaway)
         errorprone(rootProject.libs.errorprone.core)
     }
-
-    // val signing = extensions.getByType<SigningExtension>()
-    // val signingKey: String? by project
-    // val signingPassword: String? by project
-    // signing.useInMemoryPgpKeys(signingKey, signingPassword)
 
     with(extensions.getByType<IndraExtension>()) {
         javaVersions {

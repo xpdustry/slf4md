@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
 import mindustry.mod.Plugin;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

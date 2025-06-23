@@ -22,7 +22,12 @@ The plugins require:
 If one of your plugins requires `slf4md`, you don't have to do anything special.
 Simply choose the implementation that suits your needs and install it on your server (in the `config/mods` directory):
 
-- `slf4md-simple`: A logger that redirects to arc logger (`arc.util.Log`). No fancy stuff or invasive changes.
+- `slf4md-simple`: A logger that redirects to arc logger (`arc.util.Log`). 
+  - No fancy stuff or invasive changes. 
+  - Comes with 3 simple settings accessible with the command `config`:
+    - `loggerTrace`: Enable trace logging when debug is enabled. Disabled by default.
+    - `loggerDisplayPlugin`: Prepends the owning plugin name of a logger. Enabled by default.
+    - `loggerDisplayClass`: Prepends the owning class of a logger. Disabled by default.
 
 ### For plugin developers
 
