@@ -11,7 +11,7 @@ slf4j = "2.0.17"
 
 # static analysis
 errorprone-core = "2.38.0"
-nullaway = "0.12.3"
+nullaway = "0.12.7"
 checker-qual = "3.49.4"
 
 [libraries]
