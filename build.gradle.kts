@@ -24,7 +24,7 @@ plugins {
     alias(libs.plugins.errorprone.gradle) apply false
 }
 
-version = "1.0.3" + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
+version = "1.0.4" + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
 group = "com.xpdustry"
 description = "A SLF4J implementation for Mindustry servers."
 
