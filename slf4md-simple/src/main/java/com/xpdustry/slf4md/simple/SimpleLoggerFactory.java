@@ -115,7 +115,7 @@ public final class SimpleLoggerFactory implements ILoggerFactory {
         try (final var input = resource) {
             final var meta = new Json().fromJson(Mods.ModMeta.class, input);
             meta.cleanup();
-            return meta.displayName();
+            return meta.displayName;
         } catch (final Exception e) {
             return null;
         }

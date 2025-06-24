@@ -76,7 +76,7 @@ subprojects {
     metadata.version = rootProject.version.toString()
 
     val toxopid = extensions.getByType<ToxopidExtension>()
-    toxopid.compileVersion = "v${metadata.minGameVersion}"
+    toxopid.compileVersion = rootProject.libs.versions.mindustry
     toxopid.platforms = setOf(ModPlatform.SERVER)
 
     dependencies {

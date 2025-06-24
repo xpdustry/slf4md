@@ -1,4 +1,6 @@
 [versions]
+mindustry = "v149"
+
 # plugins
 shadow = "8.3.6"
 indra = "3.1.3"
