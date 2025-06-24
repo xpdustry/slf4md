@@ -25,8 +25,6 @@
  */
 package com.xpdustry.slf4md.simple;
 
-import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.IMarkerFactory;
 import org.slf4j.helpers.BasicMarkerFactory;
@@ -36,23 +34,23 @@ import org.slf4j.spi.SLF4JServiceProvider;
 
 public final class SimpleLoggerProvider implements SLF4JServiceProvider {
 
-    private @Nullable ILoggerFactory loggerFactory = null;
-    private @Nullable IMarkerFactory markerFactory = null;
-    private @Nullable MDCAdapter mdcAdapter = null;
+    private final ILoggerFactory loggerFactory = new SimpleLoggerFactory();
+    private final IMarkerFactory markerFactory = new BasicMarkerFactory();
+    private final MDCAdapter mdcAdapter = new NOPMDCAdapter();
 
     @Override
     public ILoggerFactory getLoggerFactory() {
-        return Objects.requireNonNull(this.loggerFactory);
+        return this.loggerFactory;
     }
 
     @Override
     public IMarkerFactory getMarkerFactory() {
-        return Objects.requireNonNull(this.markerFactory);
+        return this.markerFactory;
     }
 
     @Override
     public MDCAdapter getMDCAdapter() {
-        return Objects.requireNonNull(this.mdcAdapter);
+        return this.mdcAdapter;
     }
 
     @Override
@@ -61,9 +59,5 @@ public final class SimpleLoggerProvider implements SLF4JServiceProvider {
     }
 
     @Override
-    public void initialize() {
-        this.loggerFactory = new SimpleLoggerFactory();
-        this.markerFactory = new BasicMarkerFactory();
-        this.mdcAdapter = new NOPMDCAdapter();
-    }
+    public void initialize() {}
 }
