@@ -1,0 +1,12 @@
+{
+  "name": "slf4md",
+  "author": "xpdustry",
+  "repo": "xpdustry/slf4md",
+  "minGameVersion": "149",
+  "java": true,
+  "hidden": true,
+  "displayName": "SLF4MD",
+  "description": "A basic SLF4J implementation for Mindustry.",
+  "main": "com.xpdustry.slf4md.SimpleLoggerMod",
+  "version": "1.1.0"
+}

@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "${{ github.event.repository.name }}-artifacts"
-          path: build/tmp/release/*.jar
+          path: build/libs/slf4md.jar
           if-no-files-found: error
 
       - name: Determine Status

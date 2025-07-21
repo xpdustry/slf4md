@@ -1,9 +1,9 @@
 /*
- * This file is part of SLF4MD. A set of plugins providing various SLF4J implementations for Mindustry.
+ * This file is part of SLF4MD. A basic SLF4J implementation for Mindustry.
  *
  * MIT License
  *
- * Copyright (c) 2025 xpdustry
+ * Copyright (c) 2025 Xpdustry
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xpdustry.slf4md.simple;
+package com.xpdustry.slf4md;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.IMarkerFactory;
@@ -32,9 +32,9 @@ import org.slf4j.helpers.NOPMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
-public final class SimpleLoggerProvider implements SLF4JServiceProvider {
+public final class MindustryLoggerProvider implements SLF4JServiceProvider {
 
-    private final ILoggerFactory loggerFactory = new SimpleLoggerFactory();
+    private final ILoggerFactory loggerFactory = new MindustryLoggerFactory();
     private final IMarkerFactory markerFactory = new BasicMarkerFactory();
     private final MDCAdapter mdcAdapter = new NOPMDCAdapter();
 

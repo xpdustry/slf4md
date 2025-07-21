@@ -1,163 +1,118 @@
-import com.diffplug.gradle.spotless.SpotlessExtension
-import com.diffplug.gradle.spotless.SpotlessPlugin
-import com.diffplug.spotless.FormatterFunc
-import com.github.jengelman.gradle.plugins.shadow.ShadowJavaPlugin
-import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.xpdustry.toxopid.ToxopidExtension
 import com.xpdustry.toxopid.extension.anukeXpdustry
-import com.xpdustry.toxopid.plugin.ToxopidPlugin
 import com.xpdustry.toxopid.spec.ModMetadata
 import com.xpdustry.toxopid.spec.ModPlatform
-import net.kyori.indra.IndraExtension
-import net.kyori.indra.IndraPlugin
 import net.ltgt.gradle.errorprone.CheckSeverity
-import net.ltgt.gradle.errorprone.ErrorPronePlugin
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    alias(libs.plugins.spotless) apply false
-    alias(libs.plugins.indra.common) apply false
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.indra.common)
     alias(libs.plugins.indra.git)
-    alias(libs.plugins.shadow) apply false
-    alias(libs.plugins.toxopid) apply false
-    alias(libs.plugins.errorprone.gradle) apply false
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.toxopid)
+    alias(libs.plugins.errorprone.gradle)
 }
 
-version = "1.0.5" + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
+val metadata = ModMetadata.fromJson(rootProject.file("mod.json"))
+version = metadata.version + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
 group = "com.xpdustry"
-description = "A SLF4J implementation for Mindustry servers."
+description = metadata.description
 
-val release by tasks.registering(Copy::class) {
-    destinationDir = temporaryDir
+repositories {
+    mavenCentral()
+    anukeXpdustry()
 }
 
-allprojects {
-    apply<SpotlessPlugin>()
-
-    repositories {
-        mavenCentral()
-        anukeXpdustry()
+spotless {
+    java {
+        palantirJavaFormat()
+        importOrder("", "\\#")
+        licenseHeaderFile(rootProject.file("HEADER.txt"))
     }
-
-    with(extensions.getByType<SpotlessExtension>()) {
-        plugins.withType<JavaPlugin> {
-            java {
-                palantirJavaFormat()
-                importOrder("", "\\#")
-                // I will kill someone
-                custom(
-                    "no-wildcard-imports",
-                    object : FormatterFunc, java.io.Serializable {
-                        override fun apply(input: String) = input.apply { if (contains("*;\n")) error("No wildcard imports allowed") }
-                    },
-                )
-                licenseHeaderFile(rootProject.file("HEADER.txt"))
-                bumpThisNumberIfACustomStepChanges(1)
-            }
-        }
-        kotlinGradle {
-            ktlint()
-        }
+    kotlinGradle {
+        ktlint()
     }
 }
 
-subprojects {
-    apply<IndraPlugin>()
-    apply<ShadowPlugin>()
-    apply<ToxopidPlugin>()
-    apply<ErrorPronePlugin>()
+toxopid {
+    compileVersion = rootProject.libs.versions.mindustry
+    platforms = setOf(ModPlatform.SERVER, ModPlatform.DESKTOP, ModPlatform.ANDROID)
+}
 
-    val metadata = ModMetadata.fromJson(rootProject.file("plugin.json"))
-    val local = ModMetadata.fromJson(file("plugin.json"))
-    metadata.displayName = local.displayName
-    metadata.description = local.description
-    metadata.mainClass = local.mainClass
-    metadata.version = rootProject.version.toString()
+dependencies {
+    compileOnly(toxopid.dependencies.mindustryCore)
+    compileOnly(toxopid.dependencies.arcCore)
+    compileOnlyApi(libs.jspecify)
+    api(libs.slf4j.api)
+    api(libs.slf4j.from.jul)
+    annotationProcessor(libs.nullaway)
+    errorprone(libs.errorprone.core)
+}
 
-    val toxopid = extensions.getByType<ToxopidExtension>()
-    toxopid.compileVersion = rootProject.libs.versions.mindustry
-    toxopid.platforms = setOf(ModPlatform.SERVER)
-
-    dependencies {
-        val compileOnly by configurations
-        val compileOnlyApi by configurations
-        val annotationProcessor by configurations
-        val errorprone by configurations
-        val api by configurations
-
-        api(rootProject.libs.slf4j.api)
-        api(rootProject.libs.slf4j.from.jul)
-
-        compileOnly(toxopid.dependencies.mindustryCore)
-        compileOnly(toxopid.dependencies.arcCore)
-        compileOnlyApi(rootProject.libs.jspecify)
-        annotationProcessor(rootProject.libs.nullaway)
-        errorprone(rootProject.libs.errorprone.core)
+indra {
+    javaVersions {
+        target(8)
+        minimumToolchain(17)
     }
 
-    with(extensions.getByType<IndraExtension>()) {
-        javaVersions {
-            target(17)
-            minimumToolchain(17)
+    publishSnapshotsTo("xpdustry", "https://maven.xpdustry.com/snapshots")
+    publishReleasesTo("xpdustry", "https://maven.xpdustry.com/releases")
+
+    mitLicense()
+
+    if (metadata.repository.isNotBlank()) {
+        val repo = metadata.repository.split("/")
+        github(repo[0], repo[1]) {
+            ci(true)
+            issues(true)
+            scm(true)
         }
+    }
 
-        publishSnapshotsTo("xpdustry", "https://maven.xpdustry.com/snapshots")
-        publishReleasesTo("xpdustry", "https://maven.xpdustry.com/releases")
-
-        mitLicense()
-
-        if (metadata.repository.isNotBlank()) {
-            val repo = metadata.repository.split("/")
-            github(repo[0], repo[1]) {
-                ci(true)
-                issues(true)
-                scm(true)
+    configurePublications {
+        pom {
+            organization {
+                name = "xpdustry"
+                url = "https://www.xpdustry.com"
             }
-        }
 
-        configurePublications {
-            pom {
-                organization {
-                    name = "xpdustry"
-                    url = "https://www.xpdustry.com"
-                }
-
-                developers {
-                    developer {
-                        id = "phinner"
-                        timezone = "Europe/Brussels"
-                    }
+            developers {
+                developer {
+                    id = "phinner"
+                    timezone = "Europe/Brussels"
                 }
             }
         }
     }
+}
 
-    val generateResources by tasks.registering {
-        outputs.files(fileTree(temporaryDir))
-        doLast {
-            temporaryDir.resolve("plugin.json").writeText(ModMetadata.toJson(metadata))
-        }
+val generateResources by tasks.registering {
+    inputs.property("metadata", metadata)
+    outputs.files(fileTree(temporaryDir))
+    doLast {
+        temporaryDir.resolve("mod.json").writeText(ModMetadata.toJson(metadata))
     }
+}
 
-    val shadowJar =
-        tasks.named<ShadowJar>(ShadowJavaPlugin.SHADOW_JAR_TASK_NAME) {
-            archiveFileName = "${project.name}.jar"
-            archiveClassifier = "plugin"
-            from(generateResources)
-            from(rootProject.file("LICENSE.md")) { into("META-INF") }
-        }
+tasks.shadowJar {
+    from(generateResources)
+    from(rootProject.file("LICENSE.md")) { into("META-INF") }
+}
 
-    tasks.withType<JavaCompile> {
-        options.errorprone {
-            disableWarningsInGeneratedCode = true
-            disable("MissingSummary", "InlineMeSuggester")
-            check("NullAway", if (name.contains("test", ignoreCase = true)) CheckSeverity.OFF else CheckSeverity.ERROR)
-            option("NullAway:AnnotatedPackages", "com.xpdustry.slf4md")
-        }
-    }
+tasks.mergeJar {
+    archiveFileName = "${project.name}.jar"
+    archiveClassifier = "mod"
+}
 
-    release.configure {
-        from(shadowJar)
+tasks.build {
+    dependsOn(tasks.mergeJar)
+}
+
+tasks.withType<JavaCompile> {
+    options.errorprone {
+        disableWarningsInGeneratedCode = true
+        disable("MissingSummary", "InlineMeSuggester")
+        check("NullAway", if (name.contains("test", ignoreCase = true)) CheckSeverity.OFF else CheckSeverity.ERROR)
+        option("NullAway:AnnotatedPackages", "com.xpdustry.slf4md")
     }
 }

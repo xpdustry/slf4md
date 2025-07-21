@@ -1,5 +1,0 @@
-{
-  "displayName": "SLF4MD",
-  "description": "A basic SLF4J implementation for Mindustry servers.",
-  "main": "com.xpdustry.slf4md.simple.SimpleLoggerPlugin"
-}

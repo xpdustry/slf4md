@@ -1,9 +1,9 @@
 /*
- * This file is part of SLF4MD. A set of plugins providing various SLF4J implementations for Mindustry.
+ * This file is part of SLF4MD. A basic SLF4J implementation for Mindustry.
  *
  * MIT License
  *
- * Copyright (c) 2025 xpdustry
+ * Copyright (c) 2025 Xpdustry
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +23,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xpdustry.slf4md.simple;
+package com.xpdustry.slf4md;
 
 import arc.util.ColorCodes;
 import arc.util.Log;
 import arc.util.Log.LogLevel;
 import java.io.PrintWriter;
-import java.io.Serial;
 import java.io.StringWriter;
 import java.util.Arrays;
 import mindustry.net.Administration;
@@ -39,22 +38,21 @@ import org.slf4j.event.Level;
 import org.slf4j.helpers.AbstractLogger;
 import org.slf4j.helpers.MessageFormatter;
 
-public final class SimpleLogger extends AbstractLogger {
+public final class MindustryLogger extends AbstractLogger {
 
-    @Serial
     private static final long serialVersionUID = 3476499937056865545L;
 
     private static final Object WRITE_LOCK = new Object();
     private static final Administration.Config ENABLE_TRACE =
             new Administration.Config("loggerTrace", "Enable trace logging when debug is enabled.", false);
-    private static final Administration.Config ENABLE_PLUGIN =
-            new Administration.Config("loggerDisplayPlugin", "Prepends the owning plugin name of a logger", true);
+    private static final Administration.Config ENABLE_MOD =
+            new Administration.Config("loggerDisplayMod", "Prepends the owning mod/plugin name of a logger", true);
     private static final Administration.Config ENABLE_CLASS =
             new Administration.Config("loggerDisplayClass", "Prepends the owning class of a logger.", false);
 
     private final @Nullable String plugin;
 
-    public SimpleLogger(final String name, final @Nullable String plugin) {
+    public MindustryLogger(final String name, final @Nullable String plugin) {
         this.name = name;
         this.plugin = plugin;
     }
@@ -121,10 +119,10 @@ public final class SimpleLogger extends AbstractLogger {
             final String messagePattern,
             @Nullable Object @Nullable [] arguments,
             @Nullable Throwable throwable) {
-        final var builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
 
         if (!this.name.equals(ROOT_LOGGER_NAME)) {
-            if (this.plugin != null && ENABLE_PLUGIN.isBool() && ENABLE_PLUGIN.bool()) {
+            if (this.plugin != null && ENABLE_MOD.isBool() && ENABLE_MOD.bool()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
                         .append(this.plugin)
@@ -149,16 +147,16 @@ public final class SimpleLogger extends AbstractLogger {
         if (throwable == null
                 && arguments != null
                 && arguments.length != 0
-                && arguments[arguments.length - 1] instanceof final Throwable last) {
-            throwable = last;
+                && arguments[arguments.length - 1] instanceof Throwable) {
+            throwable = (Throwable) arguments[arguments.length - 1];
             arguments = arguments.length == 1 ? null : Arrays.copyOf(arguments, arguments.length - 1);
         }
 
         builder.append(MessageFormatter.basicArrayFormat(messagePattern.replace("{}", "&fb&lb{}&fr"), arguments));
 
         if (throwable != null) {
-            final var sw = new StringWriter();
-            final var pw = new PrintWriter(sw);
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
             throwable.printStackTrace(pw);
             builder.append(": ").append(sw);
         }
@@ -174,20 +172,32 @@ public final class SimpleLogger extends AbstractLogger {
     }
 
     private LogLevel getArcLogLevel(final Level level) {
-        return switch (level) {
-            case TRACE, DEBUG -> LogLevel.debug;
-            case INFO -> LogLevel.info;
-            case WARN -> LogLevel.warn;
-            case ERROR -> LogLevel.err;
-        };
+        switch (level) {
+            case TRACE:
+            case DEBUG:
+                return LogLevel.debug;
+            case WARN:
+                return LogLevel.warn;
+            case ERROR:
+                return LogLevel.err;
+            case INFO:
+            default:
+                return LogLevel.info;
+        }
     }
 
     private String getColorCode(final Level level) {
-        return switch (level) {
-            case DEBUG, TRACE -> ColorCodes.lightCyan + ColorCodes.bold;
-            case INFO -> ColorCodes.lightBlue + ColorCodes.bold;
-            case WARN -> ColorCodes.lightYellow + ColorCodes.bold;
-            case ERROR -> ColorCodes.lightRed + ColorCodes.bold;
-        };
+        switch (level) {
+            case TRACE:
+            case DEBUG:
+                return ColorCodes.lightCyan + ColorCodes.bold;
+            case WARN:
+                return ColorCodes.lightYellow + ColorCodes.bold;
+            case ERROR:
+                return ColorCodes.lightRed + ColorCodes.bold;
+            case INFO:
+            default:
+                return ColorCodes.lightBlue + ColorCodes.bold;
+        }
     }
 }
