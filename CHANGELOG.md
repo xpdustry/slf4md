@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changes
 
 - Converted this plugin into a mod, for compatibility with mods.
+- Now compatible with android.
 
 ## v1.0.4 - 2025-06-24
 
