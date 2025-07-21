@@ -61,7 +61,7 @@ plugins {
 def downloadSlf4md = tasks.register("downloadSlf4md", GithubAssetDownload) {
     owner = "xpdustry"
     repo = "slf4md"
-    asset = "slf4md-simple.jar"
+    asset = "slf4md.jar"
     version = "v1.x.x"
 }
 
@@ -86,7 +86,7 @@ plugins {
 val downloadSlf4md by tasks.registering(GithubAssetDownload::class) {
     owner = "xpdustry"
     repo = "slf4md"
-    asset = "slf4md-simple.jar"
+    asset = "slf4md.jar"
     version = "v1.x.x"
 }
 
