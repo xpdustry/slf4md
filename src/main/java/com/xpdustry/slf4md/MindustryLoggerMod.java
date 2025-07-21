@@ -39,7 +39,7 @@ public final class MindustryLoggerMod extends Mod {
         try {
             if (!(LoggerFactory.getILoggerFactory() instanceof MindustryLoggerFactory)) {
                 Log.err(
-                        "The slf4j Logger factory isn't provided by SLF4MD (got @ instead of SimpleLoggerFactory). Make sure another plugin doesn't set it's own logging implementation or that it's logging implementation is relocated correctly.",
+                        "The slf4j Logger factory isn't provided by SLF4MD (got @ instead of SimpleLoggerFactory). Make sure another mod/plugin doesn't set it's own logging implementation or that it's logging implementation is relocated correctly.",
                         LoggerFactory.getILoggerFactory().getClass().getName());
             } else {
                 // Redirect JUL to SLF4J

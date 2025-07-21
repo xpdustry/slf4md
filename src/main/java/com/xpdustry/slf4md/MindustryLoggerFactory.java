@@ -29,9 +29,9 @@ import arc.util.serialization.Json;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import mindustry.mod.Mod;
 import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
-import mindustry.mod.Plugin;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -71,13 +71,13 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
             }
         }
 
-        if (Plugin.class.isAssignableFrom(caller)) {
-            final String display = this.getPluginDisplayName(caller.getClassLoader());
+        if (Mod.class.isAssignableFrom(caller)) {
+            final String display = this.getModDisplayName(caller.getClassLoader());
             if (display == null) {
                 return new MindustryLogger(name, null);
             }
-            // Plugin loggers are found on the first lookup, thus if the cache flag is false,
-            // it means a custom logger has been created inside the plugin class
+            // Mod loggers are found on the first lookup, thus if the cache flag is false,
+            // it means a custom logger has been created inside the mod class
             final MindustryLogger logger =
                     cache ? new MindustryLogger(display, display) : new MindustryLogger(name, display);
             if (cache) {
@@ -90,7 +90,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
         String display = null;
         while (loader != null) {
             if (loader.getParent() instanceof ModClassLoader) {
-                display = this.getPluginDisplayName(loader);
+                display = this.getModDisplayName(loader);
                 break;
             }
             loader = loader.getParent();
@@ -103,7 +103,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
         return logger;
     }
 
-    private @Nullable String getPluginDisplayName(final ClassLoader loader) {
+    private @Nullable String getModDisplayName(final ClassLoader loader) {
         InputStream resource = null;
         for (final String name : MOD_METADATA_NAMES) {
             resource = loader.getResourceAsStream(name);

@@ -50,11 +50,11 @@ public final class MindustryLogger extends AbstractLogger {
     private static final Administration.Config ENABLE_CLASS =
             new Administration.Config("loggerDisplayClass", "Prepends the owning class of a logger.", false);
 
-    private final @Nullable String plugin;
+    private final @Nullable String mod;
 
-    public MindustryLogger(final String name, final @Nullable String plugin) {
+    public MindustryLogger(final String name, final @Nullable String mod) {
         this.name = name;
-        this.plugin = plugin;
+        this.mod = mod;
     }
 
     @Override
@@ -122,10 +122,10 @@ public final class MindustryLogger extends AbstractLogger {
         final StringBuilder builder = new StringBuilder();
 
         if (!this.name.equals(ROOT_LOGGER_NAME)) {
-            if (this.plugin != null && ENABLE_MOD.isBool() && ENABLE_MOD.bool()) {
+            if (this.mod != null && ENABLE_MOD.isBool() && ENABLE_MOD.bool()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
-                        .append(this.plugin)
+                        .append(this.mod)
                         .append(']')
                         .append(ColorCodes.reset)
                         .append(' ');
