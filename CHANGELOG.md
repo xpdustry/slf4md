@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.1.1 - 2025-07-21
+
+### Bugfixes
+
+- Fixed invalid `mod.json`, making the mod crash.
+
 ## v1.1.0 - 2025-07-21
 
 ### Changes
