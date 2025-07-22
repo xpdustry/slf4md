@@ -5,7 +5,7 @@ mindustry = "v149"
 shadow = "8.3.8"
 indra = "3.1.3"
 toxopid = "4.1.2"
-spotless = "7.2.0"
+spotless = "7.2.1"
 errorprone-gradle = "4.3.0"
 
 # logging
