@@ -26,9 +26,11 @@
 package com.xpdustry.slf4md;
 
 import arc.util.serialization.Json;
+import arc.util.serialization.Jval;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.InputStreamReader;
 import mindustry.mod.Mod;
 import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
@@ -42,6 +44,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
     private static final String[] MOD_METADATA_NAMES = {"mod.json", "mod.hjson", "plugin.json", "plugin.hjson"};
 
     private final Map<String, MindustryLogger> loggers = new ConcurrentHashMap<>();
+    private final Json json = new Json();
 
     {
         this.loggers.put(Logger.ROOT_LOGGER_NAME, new MindustryLogger(Logger.ROOT_LOGGER_NAME, null));
@@ -115,7 +118,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
             return null;
         }
         try (final InputStream input = resource) {
-            final Mods.ModMeta meta = new Json().fromJson(Mods.ModMeta.class, input);
+            final Mods.ModMeta meta = json.fromJson(Mods.ModMeta.class, Jval.read(new InputStreamReader(input)).toString(Jval.Jformat.plain));
             meta.cleanup();
             return meta.displayName;
         } catch (final Exception e) {
