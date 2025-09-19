@@ -13,7 +13,7 @@ slf4j = "2.0.17"
 
 # static analysis
 jspecify = "1.0.0"
-errorprone-core = "2.40.0"
+errorprone-core = "2.42.0"
 nullaway = "0.12.7"
 
 [libraries]
