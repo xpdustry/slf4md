@@ -29,6 +29,7 @@ import arc.util.serialization.Json;
 import arc.util.serialization.Jval;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import mindustry.mod.Mod;
@@ -118,7 +119,10 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
             return null;
         }
         try (final InputStream input = resource) {
-            final Mods.ModMeta meta = json.fromJson(Mods.ModMeta.class, Jval.read(new InputStreamReader(input)).toString(Jval.Jformat.plain));
+            final Mods.ModMeta meta = this.json.fromJson(
+                    Mods.ModMeta.class,
+                    Jval.read(new InputStreamReader(input, StandardCharsets.UTF_8))
+                            .toString(Jval.Jformat.plain));
             meta.cleanup();
             return meta.displayName;
         } catch (final Exception e) {
