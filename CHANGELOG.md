@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.1.2 - 2025-09-26
+
+### Bugfixes
+
+- Fixed JSON deserialization of mod/plugin descriptors (https://github.com/xpdustry/slf4md/pull/45). Thank @ZetaMap.
+
+### Chores
+
+- Bumped most of the dependencies.
+
 ## v1.1.1 - 2025-07-21
 
 ### Bugfixes
