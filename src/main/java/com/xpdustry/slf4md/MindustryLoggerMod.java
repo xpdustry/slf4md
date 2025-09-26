@@ -27,9 +27,11 @@ package com.xpdustry.slf4md;
 
 import arc.util.Log;
 import mindustry.mod.Mod;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+@SuppressWarnings("unused")
 public final class MindustryLoggerMod extends Mod {
 
     static {
@@ -42,12 +44,20 @@ public final class MindustryLoggerMod extends Mod {
                         "The slf4j Logger factory isn't provided by SLF4MD (got @ instead of SimpleLoggerFactory). Make sure another mod/plugin doesn't set it's own logging implementation or that it's logging implementation is relocated correctly.",
                         LoggerFactory.getILoggerFactory().getClass().getName());
             } else {
+                final Logger logger = LoggerFactory.getLogger(MindustryLoggerMod.class);
+                logger.info("Initialized SLF4MD");
                 // Redirect JUL to SLF4J
-                SLF4JBridgeHandler.removeHandlersForRootLogger();
-                SLF4JBridgeHandler.install();
-                LoggerFactory.getLogger(MindustryLoggerMod.class).info("Initialized SLF4MD");
+                try {
+                    SLF4JBridgeHandler.removeHandlersForRootLogger();
+                    SLF4JBridgeHandler.install();
+                    logger.debug("Successfully redirected java logging to SLF4MD");
+                } catch (final NoClassDefFoundError e) {
+                    logger.debug("Java logging classes are missing, skipping redirection");
+                } catch (final Throwable e) {
+                    logger.error("Failed to redirect java logging to SLF4MD", e);
+                }
             }
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             Log.err("Failed to initialize SLF4MD logger", e);
         } finally {
             // Restore the class loader
