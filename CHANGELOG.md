@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.1.3 - 2025-09-26
+
+### Bugfixes
+
+- Fixed SLF4MD crashing if the `JVM` is missing `java.util.logging` classes.
+
 ## v1.1.2 - 2025-09-26
 
 ### Bugfixes
