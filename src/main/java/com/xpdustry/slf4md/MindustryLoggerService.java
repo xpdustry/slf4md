@@ -32,7 +32,7 @@ import org.slf4j.helpers.NOPMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
-public final class MindustryLoggerProvider implements SLF4JServiceProvider {
+public final class MindustryLoggerService implements SLF4JServiceProvider {
 
     private final ILoggerFactory loggerFactory = new MindustryLoggerFactory();
     private final IMarkerFactory markerFactory = new BasicMarkerFactory();
