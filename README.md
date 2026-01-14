@@ -6,15 +6,15 @@
 
 ## Description
 
-A plugin providing a simple SLF4J implementation for Mindustry mods/plugins.
+A mod providing a simple SLF4J implementation for Mindustry mods/plugins.
 All it does it redirecting SLF4J logger (`org.slf4j.Logger`) to Arc logger (`arc.util.Log`).
 
 ## Installation
 
-The plugins require:
+The mod requires:
 
 - Java 8 or above.
-- Mindustry v149 or above.
+- Mindustry v154 or above.
 
 ## Usage
 
@@ -97,6 +97,8 @@ tasks.withType<MindustryExec> {
 </details>
 
 ## Building
+
+The mod requires Java 25 for compilation.
 
 - `./gradlew :mergeJar` to compile the plugin into a usable jar (will be located at `builds/libs/slf4md.jar`).
 - `./gradlew :runMindustryServer` to run the plugin in a local Mindustry server.

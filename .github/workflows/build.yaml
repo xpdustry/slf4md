@@ -73,15 +73,6 @@ jobs:
             **/build/test-results/test/TEST-*.xml
             **/build/reports/
 
-      # - name: "Publish to Maven"
-      #   if: ${{ github.event_name == 'release' || startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/heads/dev') }}
-      #   run: ./gradlew publish
-      #   env:
-      #     ORG_GRADLE_PROJECT_xpdustryUsername: "${{ secrets.XPDUSTRY_MAVEN_USERNAME }}"
-      #     ORG_GRADLE_PROJECT_xpdustryPassword: "${{ secrets.XPDUSTRY_MAVEN_PASSWORD }}"
-      #     ORG_GRADLE_PROJECT_signingKey: "${{ secrets.XPDUSTRY_MAVEN_SIGNING_KEY }}"
-      #     ORG_GRADLE_PROJECT_signingPassword: "${{ secrets.XPDUSTRY_MAVEN_SIGNING_PASSWORD }}"
-
       - name: "Publish to GitHub"
         if: ${{ github.event_name == 'release' }}
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
@@ -109,16 +100,3 @@ jobs:
           repo: ${{ github.repository }}
           branch: ${{ github.event.release.target_commitish }}
           file_pattern: "mod.json CHANGELOG.md"
-
-  event-file:
-    name: "Event File"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-
-      - name: "Upload Event File"
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: event-file
-          path: ${{ github.event_path }}
