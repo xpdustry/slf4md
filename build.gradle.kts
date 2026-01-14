@@ -6,12 +6,11 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    alias(libs.plugins.spotless)
-    alias(libs.plugins.indra.common)
-    alias(libs.plugins.indra.git)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.toxopid)
-    alias(libs.plugins.errorprone.gradle)
+    id("com.diffplug.spotless") version "8.0.0"
+    id("net.kyori.indra") version "4.0.0"
+    id("com.gradleup.shadow") version "9.2.2"
+    id("com.xpdustry.toxopid") version "4.1.2"
+    id("net.ltgt.errorprone") version "4.3.0"
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("mod.json"))
@@ -36,18 +35,18 @@ spotless {
 }
 
 toxopid {
-    compileVersion = rootProject.libs.versions.mindustry
+    compileVersion = "v" + metadata.minGameVersion
     platforms = setOf(ModPlatform.SERVER, ModPlatform.DESKTOP, ModPlatform.ANDROID)
 }
 
 dependencies {
     compileOnly(toxopid.dependencies.mindustryCore)
     compileOnly(toxopid.dependencies.arcCore)
-    compileOnlyApi(libs.jspecify)
-    api(libs.slf4j.api)
-    api(libs.slf4j.from.jul)
-    annotationProcessor(libs.nullaway)
-    errorprone(libs.errorprone.core)
+    compileOnlyApi("org.jspecify:jspecify:1.0.0")
+    api("org.slf4j:slf4j-api:2.0.17")
+    api("org.slf4j:jul-to-slf4j:2.0.17")
+    annotationProcessor("com.uber.nullaway:nullaway:0.12.15")
+    errorprone("com.google.errorprone:error_prone_core:2.46.0")
 }
 
 indra {
