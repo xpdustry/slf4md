@@ -15,7 +15,7 @@ plugins {
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("mod.json"))
-version = metadata.version + if (indraGit.headTag() == null) "-SNAPSHOT" else ""
+version = metadata.version + if (findProperty("release").toString().toBoolean()) "-SNAPSHOT" else ""
 group = "com.xpdustry"
 description = metadata.description
 
