@@ -2,7 +2,7 @@
   "name": "slf4md",
   "author": "xpdustry",
   "repo": "xpdustry/slf4md",
-  "minGameVersion": "149",
+  "minGameVersion": "154",
   "java": true,
   "hidden": true,
   "displayName": "SLF4MD",
