@@ -8,5 +8,5 @@
   "displayName": "SLF4MD",
   "description": "A basic SLF4J implementation for Mindustry.",
   "main": "com.xpdustry.slf4md.MindustryLoggerMod",
-  "version": "1.1.3"
+  "version": "1.2.0"
 }
