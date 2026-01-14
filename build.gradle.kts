@@ -1,6 +1,7 @@
 import com.xpdustry.toxopid.extension.anukeXpdustry
 import com.xpdustry.toxopid.spec.ModMetadata
 import com.xpdustry.toxopid.spec.ModPlatform
+import com.xpdustry.toxopid.task.MindustryExec
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
@@ -115,4 +116,8 @@ tasks.withType<JavaCompile> {
         check("NullAway", if (name.contains("test", ignoreCase = true)) CheckSeverity.OFF else CheckSeverity.ERROR)
         option("NullAway:AnnotatedPackages", "com.xpdustry.slf4md")
     }
+}
+
+tasks.withType<MindustryExec> {
+    jvmArguments.add("--enable-native-access=ALL-UNNAMED")
 }
