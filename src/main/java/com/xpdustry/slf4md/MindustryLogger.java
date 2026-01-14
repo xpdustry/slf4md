@@ -25,12 +25,12 @@
  */
 package com.xpdustry.slf4md;
 
-import arc.util.ColorCodes;
 import arc.util.Log;
 import arc.util.Log.LogLevel;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import mindustry.Vars;
 import mindustry.net.Administration;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Marker;
@@ -126,17 +126,13 @@ public final class MindustryLogger extends AbstractLogger {
                 builder.append(this.getColorCode(level))
                         .append('[')
                         .append(this.mod)
-                        .append(']')
-                        .append(ColorCodes.reset)
-                        .append(' ');
+                        .append("]&fr ");
             }
             if (ENABLE_CLASS.isBool() && ENABLE_CLASS.bool()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
                         .append(this.name)
-                        .append(']')
-                        .append(ColorCodes.reset)
-                        .append(' ');
+                        .append("]&fr ");
             }
         }
 
@@ -162,7 +158,8 @@ public final class MindustryLogger extends AbstractLogger {
         }
 
         synchronized (WRITE_LOCK) {
-            Log.log(this.getArcLogLevel(level), builder.toString());
+            final String message = Vars.headless ? builder.toString() : Log.removeColors(builder.toString());
+            Log.log(this.getArcLogLevel(level), message);
         }
     }
 
@@ -190,14 +187,14 @@ public final class MindustryLogger extends AbstractLogger {
         switch (level) {
             case TRACE:
             case DEBUG:
-                return ColorCodes.lightCyan + ColorCodes.bold;
+                return "&lc&fb";
             case WARN:
-                return ColorCodes.lightYellow + ColorCodes.bold;
+                return "&ly&fb";
             case ERROR:
-                return ColorCodes.lightRed + ColorCodes.bold;
+                return "&lr&fb";
             case INFO:
             default:
-                return ColorCodes.lightBlue + ColorCodes.bold;
+                return "&lb&fb";
         }
     }
 }
