@@ -26,13 +26,12 @@
 package com.xpdustry.slf4md;
 
 import arc.util.Log;
-import arc.util.Log.LogLevel;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import mindustry.Vars;
-import mindustry.net.Administration;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.AbstractLogger;
@@ -42,69 +41,61 @@ public final class MindustryLogger extends AbstractLogger {
 
     private static final long serialVersionUID = 3476499937056865545L;
 
-    private static final Object WRITE_LOCK = new Object();
-    private static final Administration.Config ENABLE_TRACE =
-            new Administration.Config("loggerTrace", "Enable trace logging when debug is enabled.", false);
-    private static final Administration.Config ENABLE_MOD =
-            new Administration.Config("loggerDisplayMod", "Prepends the owning mod/plugin name of a logger", true);
-    private static final Administration.Config ENABLE_CLASS =
-            new Administration.Config("loggerDisplayClass", "Prepends the owning class of a logger.", false);
-
     private final @Nullable String mod;
 
-    public MindustryLogger(final String name, final @Nullable String mod) {
+    MindustryLogger(final String name, final @Nullable String mod) {
         this.name = name;
         this.mod = mod;
     }
 
     @Override
     public boolean isTraceEnabled() {
-        return this.isArcLogLevelAtLeast(LogLevel.debug) && ENABLE_TRACE.bool();
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.TRACE);
     }
 
     @Override
     public boolean isTraceEnabled(final Marker marker) {
-        return this.isArcLogLevelAtLeast(LogLevel.debug) && ENABLE_TRACE.bool();
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.TRACE);
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return this.isArcLogLevelAtLeast(LogLevel.debug);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.DEBUG);
     }
 
     @Override
     public boolean isDebugEnabled(final Marker marker) {
-        return this.isArcLogLevelAtLeast(LogLevel.debug);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.DEBUG);
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return this.isArcLogLevelAtLeast(LogLevel.info);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.INFO);
     }
 
     @Override
     public boolean isInfoEnabled(final Marker marker) {
-        return this.isArcLogLevelAtLeast(LogLevel.info);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.INFO);
     }
 
     @Override
     public boolean isWarnEnabled() {
-        return this.isArcLogLevelAtLeast(LogLevel.warn);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.WARN);
     }
 
     @Override
     public boolean isWarnEnabled(final Marker marker) {
-        return this.isArcLogLevelAtLeast(LogLevel.warn);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.WARN);
     }
 
     @Override
     public boolean isErrorEnabled() {
-        return this.isArcLogLevelAtLeast(LogLevel.err);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.ERROR);
     }
 
     @Override
     public boolean isErrorEnabled(final Marker marker) {
-        return this.isArcLogLevelAtLeast(LogLevel.err);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.ERROR);
     }
 
     @Override
@@ -121,14 +112,14 @@ public final class MindustryLogger extends AbstractLogger {
             @Nullable Throwable throwable) {
         final StringBuilder builder = new StringBuilder();
 
-        if (!this.name.equals(ROOT_LOGGER_NAME)) {
-            if (this.mod != null && ENABLE_MOD.isBool() && ENABLE_MOD.bool()) {
+        if (!this.name.equals(Logger.ROOT_LOGGER_NAME)) {
+            if (this.mod != null && MindustryLoggerMod.isShowModName()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
                         .append(this.mod)
                         .append("]&fr ");
             }
-            if (ENABLE_CLASS.isBool() && ENABLE_CLASS.bool()) {
+            if (MindustryLoggerMod.isShowClassName()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
                         .append(this.name)
@@ -157,30 +148,8 @@ public final class MindustryLogger extends AbstractLogger {
             builder.append(": ").append(sw);
         }
 
-        synchronized (WRITE_LOCK) {
-            final String message = Vars.headless ? builder.toString() : Log.removeColors(builder.toString());
-            Log.log(this.getArcLogLevel(level), message);
-        }
-    }
-
-    @SuppressWarnings("EnumOrdinal")
-    private boolean isArcLogLevelAtLeast(final LogLevel level) {
-        return level != LogLevel.none && Log.level.ordinal() <= level.ordinal();
-    }
-
-    private LogLevel getArcLogLevel(final Level level) {
-        switch (level) {
-            case TRACE:
-            case DEBUG:
-                return LogLevel.debug;
-            case WARN:
-                return LogLevel.warn;
-            case ERROR:
-                return LogLevel.err;
-            case INFO:
-            default:
-                return LogLevel.info;
-        }
+        final String message = Vars.headless ? builder.toString() : Log.removeColors(builder.toString());
+        Log.log(MindustryLogger.fromSlf4jToArcLevel(level), message);
     }
 
     private String getColorCode(final Level level) {
@@ -195,6 +164,21 @@ public final class MindustryLogger extends AbstractLogger {
             case INFO:
             default:
                 return "&lb&fb";
+        }
+    }
+
+    public static Log.LogLevel fromSlf4jToArcLevel(final Level level) {
+        switch (level) {
+            case TRACE:
+            case DEBUG:
+                return Log.LogLevel.debug;
+            case WARN:
+                return Log.LogLevel.warn;
+            case ERROR:
+                return Log.LogLevel.err;
+            case INFO:
+            default:
+                return Log.LogLevel.info;
         }
     }
 }

@@ -109,7 +109,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
 
     private @Nullable String getModDisplayName(final ClassLoader loader) {
         InputStream resource = null;
-        for (final String name : MOD_METADATA_NAMES) {
+        for (final String name : MindustryLoggerFactory.MOD_METADATA_NAMES) {
             resource = loader.getResourceAsStream(name);
             if (resource != null) {
                 break;
@@ -139,7 +139,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
             }
             final String name = stacktrace[i].getClassName();
             // Skip the logger wrappers
-            for (final String pkg : LOGGING_PACKAGES) {
+            for (final String pkg : MindustryLoggerFactory.LOGGING_PACKAGES) {
                 if (name.startsWith(pkg)) {
                     continue loop;
                 }

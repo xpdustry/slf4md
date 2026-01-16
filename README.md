@@ -18,10 +18,13 @@ The mod requires:
 
 ## Usage
 
-For server owners, this mod comes with 3 config accessible with the `config` command:
-- `loggerTrace`: Enable trace logging when debug is enabled. Disabled by default.
-- `loggerDisplayMod`: Prepends the owning plugin name of a logger. Enabled by default.
-- `loggerDisplayClass`: Prepends the owning class of a logger. Disabled by default.
+For server owners, this mod provides the `slf4md` command to manage logging at runtime:
+
+- `slf4md log-level <logger> <level|clear>`: Set or clear a specific logger level.
+- `slf4md log-level-list`: List all custom log levels currently set.
+- `slf4md enable-trace <true|false>`: Enable trace logging when debug is active.
+- `slf4md show-mod-name <true|false>`: Prepend the mod name to log statements.
+- `slf4md show-class-name <true|false>`: Prepend the class name to log statements.
 
 ## For developers
 
