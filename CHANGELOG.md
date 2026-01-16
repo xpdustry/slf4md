@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.2.0 - 2026-01-16
+
+### Changes & New features
+
+- Added `slf4md` commands. You can now control individual loggers log level.
+
+### Bugfixes
+
+- Fix colors in non-headless environments ([`69538b1`](https://github.com/xpdustry/slf4md/commit/69538b173f9c7dbb6eac8a14e17089cef238e357))
+
+### Maintenance
+
+- Refactored internals to be simpler.
+
 ## v1.1.3 - 2025-09-26
 
 ### Bugfixes
