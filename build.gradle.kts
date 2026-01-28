@@ -10,7 +10,7 @@ plugins {
     id("net.kyori.indra") version "4.0.0"
     id("com.gradleup.shadow") version "9.3.1"
     id("com.xpdustry.toxopid") version "4.1.2"
-    id("net.ltgt.errorprone") version "4.4.0"
+    id("net.ltgt.errorprone") version "5.0.0"
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("mod.json"))
