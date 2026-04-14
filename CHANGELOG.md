@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.2.1 - 2026-04-14
+
+### Maintenance
+
+- Bump mindustry min version to v157 ([`5c5d0df`](https://github.com/xpdustry/slf4md/commit/5c5d0dfa12d590c2b6dd6933f570eebf6dba27df))
+
 ## v1.2.0 - 2026-01-16
 
 ### Changes & New features
