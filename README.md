@@ -14,7 +14,7 @@ All it does it redirecting SLF4J logger (`org.slf4j.Logger`) to Arc logger (`arc
 The mod requires:
 
 - Java 8 or above.
-- Mindustry v154 or above.
+- Mindustry v157 or above.
 
 ## Usage
 
