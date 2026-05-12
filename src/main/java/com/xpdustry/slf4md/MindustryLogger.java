@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import mindustry.Vars;
+import mindustry.mod.Mods;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
@@ -41,61 +42,61 @@ public final class MindustryLogger extends AbstractLogger {
 
     private static final long serialVersionUID = 3476499937056865545L;
 
-    private final @Nullable String mod;
+    private final transient Mods.@Nullable ModMeta meta;
 
-    MindustryLogger(final String name, final @Nullable String mod) {
+    MindustryLogger(final String name, final Mods.@Nullable ModMeta meta) {
         this.name = name;
-        this.mod = mod;
+        this.meta = meta;
     }
 
     @Override
     public boolean isTraceEnabled() {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.TRACE);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.TRACE);
     }
 
     @Override
     public boolean isTraceEnabled(final Marker marker) {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.TRACE);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.TRACE);
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.DEBUG);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.DEBUG);
     }
 
     @Override
     public boolean isDebugEnabled(final Marker marker) {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.DEBUG);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.DEBUG);
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.INFO);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.INFO);
     }
 
     @Override
     public boolean isInfoEnabled(final Marker marker) {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.INFO);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.INFO);
     }
 
     @Override
     public boolean isWarnEnabled() {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.WARN);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.WARN);
     }
 
     @Override
     public boolean isWarnEnabled(final Marker marker) {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.WARN);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.WARN);
     }
 
     @Override
     public boolean isErrorEnabled() {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.ERROR);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.ERROR);
     }
 
     @Override
     public boolean isErrorEnabled(final Marker marker) {
-        return MindustryLoggerMod.hasAtLeastLevel(this.name, Level.ERROR);
+        return MindustryLoggerMod.hasAtLeastLevel(this.name, this.meta, Level.ERROR);
     }
 
     @Override
@@ -113,10 +114,10 @@ public final class MindustryLogger extends AbstractLogger {
         final StringBuilder builder = new StringBuilder();
 
         if (!this.name.equals(Logger.ROOT_LOGGER_NAME)) {
-            if (this.mod != null && MindustryLoggerMod.isShowModName()) {
+            if (this.meta != null && MindustryLoggerMod.isShowModName()) {
                 builder.append(this.getColorCode(level))
                         .append('[')
-                        .append(this.mod)
+                        .append(this.meta.displayName)
                         .append("]&fr ");
             }
             if (MindustryLoggerMod.isShowClassName()) {

@@ -25,19 +25,23 @@
  */
 package com.xpdustry.slf4md;
 
-import arc.files.Fi;
+import arc.Core;
 import arc.struct.ObjectMap;
+import arc.struct.StringMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
-import arc.util.serialization.Jval;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import mindustry.Vars;
 import mindustry.mod.Mod;
+import mindustry.mod.Mods;
+import mindustry.net.Administration;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -47,14 +51,34 @@ import org.slf4j.event.Level;
 
 public final class MindustryLoggerMod extends Mod {
 
-    private static boolean showClassName = false;
-    private static boolean showModName = true;
-    private static boolean traceEnabled = false;
-    private static final Map<String, Level> levels = new ConcurrentHashMap<>();
+    private static final Supplier<Boolean> showClassName = MindustryUtils.registerSafeSettingEntry(
+            "logShowClassName",
+            "Whether the class name of a logger should be added to the log statement.",
+            false,
+            Boolean::parseBoolean);
+
+    private static final Supplier<Boolean> showModName = MindustryUtils.registerSafeSettingEntry(
+            "logShowModName",
+            "Whether the mod name of a logger should be added to the log statement.",
+            true,
+            Boolean::parseBoolean);
+
+    private static final Supplier<Boolean> traceEnabled = MindustryUtils.registerSafeSettingEntry(
+            "trace",
+            "Whether trace logging is enabled. Trace shows every single detail occurring in this server. Enabling tracing enables debug too.",
+            true,
+            Boolean::parseBoolean,
+            () -> {
+                if (isTraceEnabled()) {
+                    Administration.Config.debug.set(true);
+                }
+            });
+
+    private static final Map<String, Level> logLevels = new ConcurrentHashMap<>();
 
     static {
         // Do the thing!
-        MindustryLoggerMod.load();
+        MindustryLoggerMod.loadLogLevels();
 
         // Class loader trickery to use the ModClassLoader instead of the root
         final ClassLoader rootClassLoader = Thread.currentThread().getContextClassLoader();
@@ -90,31 +114,18 @@ public final class MindustryLoggerMod extends Mod {
         }
     }
 
-    public static boolean isShowClassName() {
-        return MindustryLoggerMod.showClassName;
-    }
+    private static final Logger log = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
-    public static void setShowClassName(final boolean showClassName) {
-        MindustryLoggerMod.showClassName = showClassName;
-        MindustryLoggerMod.save();
+    public static boolean isShowClassName() {
+        return MindustryLoggerMod.showClassName.get();
     }
 
     public static boolean isShowModName() {
-        return MindustryLoggerMod.showModName;
-    }
-
-    public static void setShowModName(boolean showModName) {
-        MindustryLoggerMod.showModName = showModName;
-        MindustryLoggerMod.save();
+        return MindustryLoggerMod.showModName.get();
     }
 
     public static boolean isTraceEnabled() {
-        return MindustryLoggerMod.traceEnabled;
-    }
-
-    public static void setTraceEnabled(final boolean traceEnabled) {
-        MindustryLoggerMod.traceEnabled = traceEnabled;
-        MindustryLoggerMod.save();
+        return MindustryLoggerMod.traceEnabled.get();
     }
 
     private static @Nullable Level getRootLoggerLevel() {
@@ -133,27 +144,33 @@ public final class MindustryLoggerMod extends Mod {
         }
     }
 
-    public static @Nullable Level getLoggerLevel(final String logger) {
-        final String name = logger.toLowerCase(Locale.ROOT);
+    public static @Nullable Level getLoggerLevel(String name, final Mods.@Nullable ModMeta meta) {
+        name = name.toLowerCase(Locale.ROOT);
         if (name.equals(Logger.ROOT_LOGGER_NAME.toLowerCase(Locale.ROOT))) {
             return MindustryLoggerMod.getRootLoggerLevel();
-        } else {
-            return MindustryLoggerMod.levels.get(name);
         }
+        Level level = MindustryLoggerMod.logLevels.get(name);
+        if (level == null && meta != null) {
+            level = MindustryLoggerMod.logLevels.get(meta.displayName.toLowerCase(Locale.ROOT));
+            if (level == null) {
+                level = MindustryLoggerMod.logLevels.get(meta.name.toLowerCase(Locale.ROOT));
+            }
+        }
+        return level;
     }
 
-    public static void setLoggerLevel(final String logger, final @Nullable Level level) {
-        final String name = logger.toLowerCase(Locale.ROOT);
+    public static void setLoggerLevel(String name, final @Nullable Level level) {
+        name = name.toLowerCase(Locale.ROOT);
         if (level == null) {
-            MindustryLoggerMod.levels.remove(name);
+            MindustryLoggerMod.logLevels.remove(name);
         } else {
-            MindustryLoggerMod.levels.put(name, level);
+            MindustryLoggerMod.logLevels.put(name, level);
         }
-        MindustryLoggerMod.save();
+        MindustryLoggerMod.saveLogLevels();
     }
 
-    public static boolean hasAtLeastLevel(final String logger, final Level level) {
-        Level configuredLevel = MindustryLoggerMod.getLoggerLevel(logger);
+    public static boolean hasAtLeastLevel(final String name, final Mods.@Nullable ModMeta meta, final Level level) {
+        Level configuredLevel = MindustryLoggerMod.getLoggerLevel(name, meta);
         if (configuredLevel == null) {
             configuredLevel = MindustryLoggerMod.getRootLoggerLevel();
         }
@@ -163,185 +180,87 @@ public final class MindustryLoggerMod extends Mod {
         return level.toInt() >= configuredLevel.toInt();
     }
 
-    private static void save() {
-        final Fi configFile = Vars.modDirectory.child("slf4md").child("config.json");
-        final Jval object = Jval.newObject()
-                .put("show-class-name", MindustryLoggerMod.showClassName)
-                .put("show-mod-name", MindustryLoggerMod.showModName)
-                .put("trace-enabled", MindustryLoggerMod.traceEnabled);
-        final Jval levels = Jval.newObject();
-        for (final Map.Entry<String, Level> entry : MindustryLoggerMod.levels.entrySet()) {
-            levels.put(entry.getKey(), entry.getValue().toString());
-        }
-        try (final Writer writer = configFile.writer(false)) {
-            object.put("log-levels", levels).writeTo(writer, Jval.Jformat.formatted);
-        } catch (final Exception e) {
-            Log.err("Failed to save settings to disk", e);
+    private static void loadLogLevels() {
+        final StringMap rawLogLevels =
+                Core.settings.getJson("slf4md-log-levels", StringMap.class, String.class, StringMap::new);
+        for (final ObjectMap.Entry<String, String> entry : rawLogLevels.entries()) {
+            final Level level;
+            try {
+                level = Level.valueOf(entry.value);
+            } catch (final IllegalArgumentException ignored) {
+                continue;
+            }
+            MindustryLoggerMod.logLevels.put(entry.key, level);
         }
     }
 
-    private static void load() {
-        final Fi configFile = Vars.modDirectory.child("slf4md").child("config.json");
-        if (!configFile.exists()) {
-            return;
+    private static void saveLogLevels() {
+        final StringMap rawLogLevels = new StringMap();
+        for (final Map.Entry<String, Level> entry : MindustryLoggerMod.logLevels.entrySet()) {
+            rawLogLevels.put(entry.getKey(), entry.getValue().toString());
         }
-        final Jval object;
-        try (final Reader reader = configFile.reader()) {
-            object = Jval.read(reader);
-        } catch (final Exception e) {
-            Log.err("[SLF4MD] Failed to read SLF4MD settings", e);
-            return;
-        }
-        final Jval showClassName = object.get("show-class-name");
-        if (showClassName != null && showClassName.isBoolean()) {
-            MindustryLoggerMod.showClassName = showClassName.asBool();
-        }
-        final Jval showModName = object.get("show-mod-name");
-        if (showModName != null && showModName.isBoolean()) {
-            MindustryLoggerMod.showModName = showModName.asBool();
-        }
-        final Jval traceEnabled = object.get("trace-enabled");
-        if (traceEnabled != null && traceEnabled.isBoolean()) {
-            MindustryLoggerMod.traceEnabled = traceEnabled.asBool();
-        }
-        final Jval levels = object.get("log-levels");
-        if (levels != null && levels.isObject()) {
-            for (final ObjectMap.Entry<String, Jval> entry : levels.asObject()) {
-                if (!entry.value.isString()) {
-                    continue;
-                }
-                final Level level;
-                try {
-                    level = Level.valueOf(entry.value.asString().toUpperCase(Locale.ROOT));
-                } catch (final IllegalArgumentException e) {
-                    Log.warn("[SLF4MD]: Invalid log level @ for @ in settings file.", entry.value, entry.key);
-                    continue;
-                }
-                MindustryLoggerMod.levels.put(entry.key.toLowerCase(Locale.ROOT), level);
-            }
-        }
+        Core.settings.putJson("slf4md-log-levels", String.class, rawLogLevels);
     }
 
     @Override
     public void registerServerCommands(final CommandHandler handler) {
-        handler.register("slf4md", "[subcommand] [arg1] [arg2]", "SLF4MD management commands.", args -> {
-            if (args.length == 0) {
-                Log.info(">>> SLF4MD >>> Available SubCommands >>>");
-                Log.info("> log-level <logger> [level|clear]");
-                Log.info("Change or clear the log level of a specified logger.");
-                Log.info("> log-level-list");
-                Log.info("List the log levels you have explicitly set.");
-                Log.info("> enable-trace [true|false]");
-                Log.info("Toggle trace logging when debug is active.");
-                Log.info("> show-mod-name [true|false]");
-                Log.info("Toggle mod name display in log statements.");
-                Log.info("> show-class-name [true|false]");
-                Log.info("Toggle class name display in log statements.");
+        handler.register("log-level-set", "<name> <level|default>", "Set the log level of a SLF4MD logger.", args -> {
+            final String name = args[0];
+            final String levelRaw = args[1];
+            final Level level;
+            if (levelRaw.equalsIgnoreCase("default")) {
+                level = null;
+            } else {
+                try {
+                    level = Level.valueOf(levelRaw.toUpperCase(Locale.ROOT));
+                } catch (final IllegalArgumentException e) {
+                    log.atError()
+                            .setMessage("This is not a valid level, expected ({}), got {}")
+                            .addArgument(() -> Stream.concat(
+                                            Stream.of("default"),
+                                            Stream.of(Level.values())
+                                                    .map(l -> l.name().toLowerCase(Locale.ROOT)))
+                                    .collect(Collectors.joining("|")))
+                            .addArgument(levelRaw)
+                            .log();
+                    return;
+                }
+            }
+            MindustryLoggerMod.setLoggerLevel(args[0], level);
+            log.info(
+                    "Set log level of {} to {}",
+                    name,
+                    level == null ? "default" : level.name().toLowerCase(Locale.ROOT));
+        });
+
+        handler.register("log-level-list", "List the loggers with an explicit log level.", ignored -> {
+            if (MindustryLoggerMod.logLevels.isEmpty()) {
+                log.info("No explicit log levels have been set.");
                 return;
             }
 
-            switch (args[0]) {
-                case "log-level":
-                    if (args.length == 1) {
-                        Log.err("Usage: log-level <logger> [level|clear]");
-                    } else if (args.length == 2) {
-                        final Level level = MindustryLoggerMod.getLoggerLevel(args[1]);
-                        if (level == null) {
-                            Log.info("Logger @ has no explicit level set (inherits from root).", args[1]);
-                        } else {
-                            Log.info("Logger @ has level @.", args[1], level);
-                        }
-                    } else {
-                        if (args[1].equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
-                            Log.err("Cannot modify the root logger level. Use Mindustry's log level settings instead.");
-                            return;
-                        }
-                        if (args[2].equalsIgnoreCase("clear")) {
-                            MindustryLoggerMod.setLoggerLevel(args[1], null);
-                            Log.info("Logger @ now has no explicit level set.", args[1]);
-                        } else {
-                            final Level level;
-                            try {
-                                level = Level.valueOf(args[2].toUpperCase(Locale.ROOT));
-                            } catch (final IllegalArgumentException e) {
-                                Log.err(
-                                        "Invalid log level @, accepted values are @ or 'clear'.",
-                                        args[2],
-                                        Arrays.toString(Level.values()));
-                                return;
-                            }
-                            MindustryLoggerMod.setLoggerLevel(args[1], level);
-                            Log.info("Set log level of @ to @.", args[1], level);
-                        }
-                    }
-                    break;
+            final List<Map.Entry<String, Level>> entries = new ArrayList<>(MindustryLoggerMod.logLevels.entrySet());
+            entries.sort(Map.Entry.comparingByKey());
 
-                case "log-level-list":
-                    if (MindustryLoggerMod.levels.isEmpty()) {
-                        Log.info("No custom log levels have been set.");
-                    } else {
-                        Log.info(">>> SLF4MD >>> Custom Log Levels >>>");
-                        for (final Map.Entry<String, Level> entry : MindustryLoggerMod.levels.entrySet()) {
-                            Log.info("@ -> @", entry.getKey(), entry.getValue());
-                        }
-                    }
-                    break;
+            final StringBuilder builder = new StringBuilder();
+            for (final Map.Entry<String, Level> entry : entries) {
+                builder.append("\n");
 
-                case "enable-trace":
-                    if (args.length == 1) {
-                        Log.info(
-                                "Trace logging is currently @.",
-                                MindustryLoggerMod.isTraceEnabled() ? "enabled" : "disabled");
-                    } else {
-                        final String stringValue = args[1].toLowerCase(Locale.ROOT);
-                        if (!stringValue.equals("true") && !stringValue.equals("false")) {
-                            Log.err("Usage: enable-trace [true|false]");
-                            return;
-                        }
-                        final boolean value = Boolean.parseBoolean(stringValue);
-                        MindustryLoggerMod.setTraceEnabled(value);
-                        Log.info("Trace logging is now @.", value ? "enabled" : "disabled");
-                    }
-                    break;
+                final String name = entry.getKey();
+                final Level level = entry.getValue();
 
-                case "show-mod-name":
-                    if (args.length == 1) {
-                        Log.info(
-                                "Mod name display is currently @.",
-                                MindustryLoggerMod.isShowModName() ? "enabled" : "disabled");
-                    } else {
-                        final String stringValue = args[1].toLowerCase(Locale.ROOT);
-                        if (!stringValue.equals("true") && !stringValue.equals("false")) {
-                            Log.err("Usage: show-mod-name [true|false]");
-                            return;
-                        }
-                        final boolean value = Boolean.parseBoolean(stringValue);
-                        MindustryLoggerMod.setShowModName(value);
-                        Log.info("Mod name display is now @.", value ? "enabled" : "disabled");
-                    }
-                    break;
-
-                case "show-class-name":
-                    if (args.length == 1) {
-                        Log.info(
-                                "Class name display is currently @.",
-                                MindustryLoggerMod.isShowClassName() ? "enabled" : "disabled");
-                    } else {
-                        final String stringValue = args[1].toLowerCase(Locale.ROOT);
-                        if (!stringValue.equals("true") && !stringValue.equals("false")) {
-                            Log.err("Usage: show-class-name [true|false]");
-                            return;
-                        }
-                        final boolean value = Boolean.parseBoolean(stringValue);
-                        MindustryLoggerMod.setShowClassName(value);
-                        Log.info("Class name display is now @.", value ? "enabled" : "disabled");
-                    }
-                    break;
-
-                default:
-                    Log.err("Unknown subcommand: @. Run 'slf4md' without arguments for help.", args[0]);
-                    break;
+                builder.append("> ").append(name);
+                Mods.LoadedMod mod = Vars.mods.list().find(m -> m.meta.name.equalsIgnoreCase(name));
+                if (mod == null) {
+                    mod = Vars.mods.list().find(m -> m.meta.displayName.equalsIgnoreCase(name));
+                }
+                if (mod != null) {
+                    builder.append(" (mod)");
+                }
+                builder.append(": ").append(level.name().toLowerCase(Locale.ROOT));
             }
+
+            log.info(builder.toString());
         });
     }
 }

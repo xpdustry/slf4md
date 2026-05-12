@@ -76,14 +76,14 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
         }
 
         if (Mod.class.isAssignableFrom(caller)) {
-            final String display = this.getModDisplayName(caller.getClassLoader());
-            if (display == null) {
+            final Mods.ModMeta meta = this.getModMetadata(caller.getClassLoader());
+            if (meta == null) {
                 return new MindustryLogger(name, null);
             }
             // Mod loggers are found on the first lookup, thus if the cache flag is false,
             // it means a custom logger has been created inside the mod class
             final MindustryLogger logger =
-                    cache ? new MindustryLogger(display, display) : new MindustryLogger(name, display);
+                    cache ? new MindustryLogger(meta.displayName, meta) : new MindustryLogger(name, meta);
             if (cache) {
                 this.loggers.put(name, logger);
             }
@@ -91,23 +91,23 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
         }
 
         ClassLoader loader = caller.getClassLoader();
-        String display = null;
+        Mods.ModMeta meta = null;
         while (loader != null) {
             if (loader.getParent() instanceof ModClassLoader) {
-                display = this.getModDisplayName(loader);
+                meta = this.getModMetadata(loader);
                 break;
             }
             loader = loader.getParent();
         }
 
-        final MindustryLogger logger = new MindustryLogger(name, display);
+        final MindustryLogger logger = new MindustryLogger(name, meta);
         if (cache) {
             this.loggers.put(name, logger);
         }
         return logger;
     }
 
-    private @Nullable String getModDisplayName(final ClassLoader loader) {
+    private Mods.@Nullable ModMeta getModMetadata(final ClassLoader loader) {
         InputStream resource = null;
         for (final String name : MindustryLoggerFactory.MOD_METADATA_NAMES) {
             resource = loader.getResourceAsStream(name);
@@ -124,7 +124,7 @@ public final class MindustryLoggerFactory implements ILoggerFactory {
                     Jval.read(new InputStreamReader(input, StandardCharsets.UTF_8))
                             .toString(Jval.Jformat.plain));
             meta.cleanup();
-            return meta.displayName;
+            return meta;
         } catch (final Exception e) {
             return null;
         }
