@@ -31,19 +31,19 @@ public final class MindustryLoggerMod extends Mod {
             "logShowClassName",
             "Whether the class name of a logger should be added to the log statement.",
             false,
-            Boolean::parseBoolean);
+            MindustryLoggerMod::parseBooleanStrict);
 
     private static final Supplier<Boolean> showModName = MindustryUtils.registerSafeSettingEntry(
             "logShowModName",
             "Whether the mod name of a logger should be added to the log statement.",
             true,
-            Boolean::parseBoolean);
+            MindustryLoggerMod::parseBooleanStrict);
 
     private static final Supplier<Boolean> traceEnabled = MindustryUtils.registerSafeSettingEntry(
             "trace",
             "Whether trace logging is enabled. Trace shows every single detail occurring in this server. Enabling tracing enables debug too.",
             true,
-            Boolean::parseBoolean,
+            MindustryLoggerMod::parseBooleanStrict,
             () -> {
                 if (isTraceEnabled()) {
                     Administration.Config.debug.set(true);
@@ -238,5 +238,16 @@ public final class MindustryLoggerMod extends Mod {
 
             log.info(builder.toString());
         });
+    }
+
+    private static boolean parseBooleanStrict(final String value) {
+        switch (value.toLowerCase(Locale.ROOT)) {
+            case "true":
+                return true;
+            case "false":
+                return false;
+            default:
+                throw new IllegalArgumentException(value + " is not valid boolean, expecting true or false");
+        }
     }
 }
