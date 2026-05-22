@@ -28,13 +28,13 @@ import org.slf4j.event.Level;
 public final class MindustryLoggerMod extends Mod {
 
     private static final Supplier<Boolean> showClassName = MindustryUtils.registerSafeSettingEntry(
-            "logShowClassName",
+            "log-show-class-name",
             "Whether the class name of a logger should be added to the log statement.",
             false,
             MindustryLoggerMod::parseBooleanStrict);
 
     private static final Supplier<Boolean> showModName = MindustryUtils.registerSafeSettingEntry(
-            "logShowModName",
+            "log-show-mod-name",
             "Whether the mod name of a logger should be added to the log statement.",
             true,
             MindustryLoggerMod::parseBooleanStrict);
