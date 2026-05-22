@@ -7,7 +7,7 @@
 ## Description
 
 A mod providing a simple SLF4J implementation for Mindustry mods/plugins.
-All it does it redirecting SLF4J logger (`org.slf4j.Logger`) to Arc logger (`arc.util.Log`).
+It redirects the SLF4J logger (`org.slf4j.Logger`) to the Arc logger (`arc.util.Log`).
 
 ## Installation
 
@@ -18,13 +18,16 @@ The mod requires:
 
 ## Usage
 
-For server owners, this mod provides the `slf4md` command to manage logging at runtime:
+For server owners, this mod exposes dedicated runtime commands for logger levels:
 
-- `slf4md log-level <logger> <level|clear>`: Set or clear a specific logger level.
-- `slf4md log-level-list`: List all custom log levels currently set.
-- `slf4md enable-trace <true|false>`: Enable trace logging when debug is active.
-- `slf4md show-mod-name <true|false>`: Prepend the mod name to log statements.
-- `slf4md show-class-name <true|false>`: Prepend the class name to log statements.
+- `log-level-set <name> <trace|debug|info|warn|error|default>`: Set or clear a log level for a logger or mod.
+- `log-level-list`: List every logger or mod with an explicit log level.
+
+You can also configure the mod using the `config` command, with `config key value`:
+
+- `log-show-class-name`: Prepend the logger class name to log statements. Default: `false`.
+- `log-show-mod-name`: Prepend the mod name to log statements. Default: `true`.
+- `trace`: Enable trace logging when debug logging is active. Default: `false`.
 
 ## For developers
 
