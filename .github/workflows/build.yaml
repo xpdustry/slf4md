@@ -2,18 +2,20 @@ name: "Build"
 
 on:
   push:
-    branches: [ "**" ]
-    tags-ignore: [ "**" ]
+    branches:
+      - "**"
   pull_request:
   release:
-    types: [ released, prereleased ]
+    types:
+      - published
+
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
   cancel-in-progress: true
 
 env:
-  ORG_GRADLE_PROJECT_release: ${{ github.event_name == 'release' }}
+  ORG_GRADLE_PROJECT_is_release: ${{ github.event_name == 'release' }}
 
 jobs:
   action:
@@ -21,6 +23,7 @@ jobs:
     # Only run on PRs if the source branch is on someone else's repo
     if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -51,7 +54,7 @@ jobs:
         id: version
         run: |
           version="$(./gradlew properties -q | grep '^version:' | cut -d ':' -f 2 | xargs)"
-          .xpdustry-ci/scripts/version-validate.sh "$version" "$ORG_GRADLE_PROJECT_release"
+          .xpdustry-ci/scripts/version-validate.sh "$version" "$ORG_GRADLE_PROJECT_is_release"
           echo "version=${version%-SNAPSHOT}" >> "$GITHUB_OUTPUT"
 
       - name: "Build Gradle"

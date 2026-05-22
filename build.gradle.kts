@@ -6,7 +6,7 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    id("com.diffplug.spotless") version "8.4.0"
+    id("com.diffplug.spotless") version "8.5.1"
     id("net.kyori.indra") version "4.0.0"
     id("com.gradleup.shadow") version "9.4.1"
     id("com.xpdustry.toxopid") version "4.2.0"
@@ -14,7 +14,7 @@ plugins {
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("mod.json"))
-metadata.version += if (findProperty("release").toString().toBoolean()) "" else "-SNAPSHOT"
+metadata.version += if (findProperty("is_release").toString().toBoolean()) "" else "-SNAPSHOT"
 version = metadata.version
 group = "com.xpdustry"
 description = metadata.description
@@ -27,8 +27,11 @@ repositories {
 spotless {
     java {
         palantirJavaFormat()
+        formatAnnotations()
         importOrder("", "\\#")
-        licenseHeaderFile(rootProject.file("HEADER.txt"))
+        forbidModuleImports()
+        forbidWildcardImports()
+        licenseHeader("// SPDX-License-Identifier: MIT")
     }
     kotlinGradle {
         ktlint()
@@ -44,9 +47,10 @@ dependencies {
     compileOnly(toxopid.dependencies.mindustryCore)
     compileOnly(toxopid.dependencies.arcCore)
     compileOnlyApi("org.jspecify:jspecify:1.0.0")
-    api("org.slf4j:slf4j-api:2.0.17")
-    api("org.slf4j:jul-to-slf4j:2.0.17")
-    annotationProcessor("com.uber.nullaway:nullaway:0.13.3")
+    api("org.slf4j:slf4j-api:2.0.18")
+    api("org.slf4j:jul-to-slf4j:2.0.18")
+    annotationProcessor("com.uber.nullaway:nullaway:0.13.4")
+    testAnnotationProcessor("com.uber.nullaway:nullaway:0.13.4")
     errorprone("com.google.errorprone:error_prone_core:2.49.0")
 }
 
@@ -87,16 +91,15 @@ indra {
     }
 }
 
-val generateResources by tasks.registering {
+val generateMetadataFile by tasks.registering {
     inputs.property("metadata", metadata)
-    outputs.files(fileTree(temporaryDir))
-    doLast {
-        temporaryDir.resolve("mod.json").writeText(ModMetadata.toJson(metadata))
-    }
+    val output = temporaryDir.resolve("plugin.json")
+    outputs.file(output)
+    doLast { output.writeText(ModMetadata.toJson(metadata)) }
 }
 
 tasks.shadowJar {
-    from(generateResources)
+    from(generateMetadataFile)
     from(rootProject.file("LICENSE.md")) { into("META-INF") }
 }
 
@@ -111,10 +114,9 @@ tasks.build {
 
 tasks.withType<JavaCompile> {
     options.errorprone {
-        disableWarningsInGeneratedCode = true
         disable("MissingSummary", "InlineMeSuggester")
-        check("NullAway", if (name.contains("test", ignoreCase = true)) CheckSeverity.OFF else CheckSeverity.ERROR)
-        option("NullAway:AnnotatedPackages", "com.xpdustry.slf4md")
+        option("NullAway:OnlyNullMarked")
+        check("NullAway", CheckSeverity.ERROR)
     }
 }
 
