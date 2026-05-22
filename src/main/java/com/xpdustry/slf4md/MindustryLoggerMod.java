@@ -42,7 +42,7 @@ public final class MindustryLoggerMod extends Mod {
     private static final Supplier<Boolean> traceEnabled = MindustryUtils.registerSafeSettingEntry(
             "trace",
             "Whether trace logging is enabled. Trace shows every single detail occurring in this server. Enabling tracing enables debug too.",
-            true,
+            false,
             MindustryLoggerMod::parseBooleanStrict,
             () -> {
                 if (isTraceEnabled()) {
@@ -122,7 +122,7 @@ public final class MindustryLoggerMod extends Mod {
 
     public static @Nullable Level getLoggerLevel(String name, final Mods.@Nullable ModMeta meta) {
         name = name.toLowerCase(Locale.ROOT);
-        if (name.equals(Logger.ROOT_LOGGER_NAME.toLowerCase(Locale.ROOT))) {
+        if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
             return MindustryLoggerMod.getRootLoggerLevel();
         }
         Level level = MindustryLoggerMod.logLevels.get(name);
@@ -182,6 +182,10 @@ public final class MindustryLoggerMod extends Mod {
     public void registerServerCommands(final CommandHandler handler) {
         handler.register("log-level-set", "<name> <level|default>", "Set the log level of a SLF4MD logger.", args -> {
             final String name = args[0];
+            if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
+                log.error("You cannot change the log level of the root logger");
+                return;
+            }
             final String levelRaw = args[1];
             final Level level;
             if (levelRaw.equalsIgnoreCase("default")) {
