@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.3.0 - 2026-05-22
+
+### Changes & New features
+
+**:warning: Soft breaking change :warning:**
+
+The configuration system of slf4md has been overhauled (#68) ([`0590b9a`](https://github.com/xpdustry/slf4md/commit/0590b9ade3cb96c0e50365e822c0f6975c74406e)).
+It's now stored in settings.bin instead of a dedicated json file.
+The json file will **not**  be automatically migrated to the new system.
+
+### Maintenance
+
+- Updated slf4j monorepo to v2.0.18 ([`03056e8`](https://github.com/xpdustry/slf4md/commit/03056e89ff2de366f95901e61cc724851f0fd822))
+
 ## v1.2.1 - 2026-04-14
 
 ### Maintenance
