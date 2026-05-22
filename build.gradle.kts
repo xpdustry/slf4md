@@ -27,8 +27,11 @@ repositories {
 spotless {
     java {
         palantirJavaFormat()
+        formatAnnotations()
         importOrder("", "\\#")
-        licenseHeaderFile(rootProject.file("HEADER.txt"))
+        forbidModuleImports()
+        forbidWildcardImports()
+        licenseHeader("// SPDX-License-Identifier: MIT")
     }
     kotlinGradle {
         ktlint()
@@ -47,6 +50,7 @@ dependencies {
     api("org.slf4j:slf4j-api:2.0.18")
     api("org.slf4j:jul-to-slf4j:2.0.18")
     annotationProcessor("com.uber.nullaway:nullaway:0.13.4")
+    testAnnotationProcessor("com.uber.nullaway:nullaway:0.13.4")
     errorprone("com.google.errorprone:error_prone_core:2.49.0")
 }
 
@@ -87,16 +91,15 @@ indra {
     }
 }
 
-val generateResources by tasks.registering {
+val generateMetadataFile by tasks.registering {
     inputs.property("metadata", metadata)
-    outputs.files(fileTree(temporaryDir))
-    doLast {
-        temporaryDir.resolve("mod.json").writeText(ModMetadata.toJson(metadata))
-    }
+    val output = temporaryDir.resolve("plugin.json")
+    outputs.file(output)
+    doLast { output.writeText(ModMetadata.toJson(metadata)) }
 }
 
 tasks.shadowJar {
-    from(generateResources)
+    from(generateMetadataFile)
     from(rootProject.file("LICENSE.md")) { into("META-INF") }
 }
 
@@ -111,10 +114,9 @@ tasks.build {
 
 tasks.withType<JavaCompile> {
     options.errorprone {
-        disableWarningsInGeneratedCode = true
         disable("MissingSummary", "InlineMeSuggester")
-        check("NullAway", if (name.contains("test", ignoreCase = true)) CheckSeverity.OFF else CheckSeverity.ERROR)
-        option("NullAway:AnnotatedPackages", "com.xpdustry.slf4md")
+        option("NullAway:OnlyNullMarked")
+        check("NullAway", CheckSeverity.ERROR)
     }
 }
 
