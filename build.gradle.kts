@@ -51,7 +51,7 @@ dependencies {
     api("org.slf4j:jul-to-slf4j:2.0.18")
     annotationProcessor("com.uber.nullaway:nullaway:0.13.4")
     testAnnotationProcessor("com.uber.nullaway:nullaway:0.13.4")
-    errorprone("com.google.errorprone:error_prone_core:2.49.0")
+    errorprone("com.google.errorprone:error_prone_core:2.50.0")
 }
 
 indra {
