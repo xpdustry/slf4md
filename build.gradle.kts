@@ -46,7 +46,7 @@ toxopid {
 dependencies {
     compileOnly(toxopid.dependencies.mindustryCore)
     compileOnly(toxopid.dependencies.arcCore)
-    compileOnlyApi("org.jspecify:jspecify:1.0.0")
+    compileOnlyApi("org.jspecify:jspecify:1.0.1")
     api("org.slf4j:slf4j-api:2.0.18")
     api("org.slf4j:jul-to-slf4j:2.0.18")
     annotationProcessor("com.uber.nullaway:nullaway:0.13.4")
