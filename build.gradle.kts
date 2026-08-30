@@ -49,8 +49,8 @@ dependencies {
     compileOnlyApi("org.jspecify:jspecify:1.0.0")
     api("org.slf4j:slf4j-api:2.0.18")
     api("org.slf4j:jul-to-slf4j:2.0.18")
-    annotationProcessor("com.uber.nullaway:nullaway:0.13.4")
-    testAnnotationProcessor("com.uber.nullaway:nullaway:0.13.4")
+    annotationProcessor("com.uber.nullaway:nullaway:0.14.1")
+    testAnnotationProcessor("com.uber.nullaway:nullaway:0.14.1")
     errorprone("com.google.errorprone:error_prone_core:2.49.0")
 }
 
