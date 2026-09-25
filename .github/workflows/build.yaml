@@ -29,26 +29,26 @@ jobs:
     steps:
 
       - name: "Checkout Repository"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-tags: true
           fetch-depth: 0
 
       - name: "Checkout CI Scripts"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: xpdustry/.github
           path: .xpdustry-ci
           sparse-checkout: scripts
 
       - name: "Setup Java 25"
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           java-version: "25"
           distribution: "temurin"
 
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
 
       - name: "Get And Validate Version"
         id: version
@@ -78,7 +78,7 @@ jobs:
 
       - name: "Publish to GitHub"
         if: ${{ github.event_name == 'release' }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           files: "build/libs/slf4md.jar"
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: "Commit Release Changes"
         if: ${{ github.event_name == 'release' }}
-        uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
+        uses: planetscale/ghcommit-action@a6b150b81dca5dd027baa898604418eec9e11465 # v0.2.22
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
